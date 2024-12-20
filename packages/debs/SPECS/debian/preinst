@@ -4,7 +4,7 @@
 set -e
 
 # configuration variables
-WAZUH_TMP_DIR="/tmp"
+WAZUH_TMP_DIR="/tmp/wazuh"
 VERSION="$2"
 MAJOR=$(echo "$VERSION" | cut -dv -f2 | cut -d. -f1)
 WAZUH_USER="wazuh-server"

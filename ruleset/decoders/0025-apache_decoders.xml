@@ -30,6 +30,12 @@
     [notice] Apache configured
     [Thu Oct 23 15:17:55.926123 2014] [ssl:info] [pid 18838] SSL Library Error: error:1407609B:SSL routines:SSL23_GET_CLIENT_HELLO:https proxy request - - speaking HTTP to HTTPS port!?
     [Tue Sep 30 12:11:21.258612 2014] [ssl:error] [pid 30473] AH02032: Hostname www.example.com provided via SNI and hostname ssl://www.example.com provided via HTTP are different
+
+ModSecurity improved:
+[Thu Jan 16 13:41:04.524305 2025] [:error] [pid 2318990:tid 140354137343552] [client 95.214.53.198:46822] [client 95.214.53.198] ModSecurity: Access denied with code 403 (phase 4). Operator GE matched 4 at TX:outbound_anomaly_score. [file "/usr/share/modsecurity-crs/rules/RESPONSE-959-BLOCKING-EVALUATION.conf"] [line "77"] [id "959100"] [msg "Outbound Anomaly Score Exceeded (Total Score: 4)"] [ver "OWASP_CRS/3.3.4"] [tag "anomaly-evaluation"] [hostname "5.249.128.56"] [uri "/"] [unique_id "Z4j-YEWqdxc9QM9cRyEa-wAAAJA"]
+[Thu Jan 16 16:10:49.477589 2025] [:error] [pid 2309605:tid 140354053449280] [client 185.242.226.75:52070] [client 185.242.226.75] ModSecurity: Warning. Pattern match "^[\\\\d.:]+$" at REQUEST_HEADERS:Host. [file "/usr/share/modsecurity-crs/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"] [line "736"] [id "920350"] [msg "Host header is a numeric IP address"] [data "5.249.128.56"] [severity "WARNING"] [ver "OWASP_CRS/3.3.4"] [tag "application-multi"] [tag "language-multi"] [tag "platform-multi"] [tag "attack-protocol"] [tag "paranoia-level/1"] [tag "OWASP_CRS"] [tag "capec/1000/210/272"] [tag "PCI/6.5.10"] [hostname "5.249.128.56"] [uri "/"] [unique_id "Z4kheR4uUSI7a7uELW8rUAAAAFI"]
+[Thu Jan 16 16:10:49.478268 2025] [:error] [pid 2309605:tid 140354053449280] [client 185.242.226.75:52070] [client 185.242.226.75] ModSecurity: Warning. Pattern match "(?:<(?:TITLE>Index of.*?<H|title>Index of.*?<h)1>Index of|>\\\\[To Parent Directory\\\\]<\\\\/[Aa]><br>)" at RESPONSE_BODY. [file "/usr/share/modsecurity-crs/rules/RESPONSE-950-DATA-LEAKAGES.conf"] [line "51"] [id "950130"] [msg "Directory Listing"] [data "Matched Data: <title>Index of /</title>\\x0a </head>\\x0a <body>\\x0a<h1>Index of found within RESPONSE_BODY: <!DOCTYPE HTML PUBLIC \\x22-//W3C//DTD HTML 3.2 Final//EN\\x22>\\x0a<html>\\x0a <head>\\x0a  <title>Index of /</title>\\x0a </head>\\x0a <body>\\x0a<h1>Index of /</h1>\\x0a  <table>\\x0a   <tr><th valign=\\x22top\\x22><img src=\\x22/icons/blank.gif\\x22 alt=\\x22[ICO]\\x22></th><th><a href=\\x22?C=N;O=D\\x22>Name</a></th><th><a href=\\x22?C=M;O=A\\x22>Last modified</a></th><th><a href=\\x22?C=S;O=A\\x22>Size</a></th><th>..."] [severity "ERROR"] [ver "OWASP_CRS/3.3.4"] [tag "application-multi"] [tag "language-multi"] [tag "platform-multi"] [tag "attack-disclosure"] [tag "paranoia-level/1"] [tag "OWASP_CRS"] [tag "capec/1000/118/116/54/127"] [tag "PCI/6.5.6 [hostname "5.249.128.56"] [uri "/"] [unique_id "Z4kheR4uUSI7a7uELW8rUAAAAFI"]
+
 -->
 
 <decoder name="apache-errorlog">
@@ -42,6 +48,13 @@
 
 <decoder name="apache-errorlog">
   <prematch>^[\w+ \w+ \d+ \d+:\d+:\d+.\d+ \d+] [\S+:warn] |^[\w+ \w+ \d+ \d+:\d+:\d+.\d+ \d+] [\S+:notice] |^[\w+ \w+ \d+ \d+:\d+:\d+.\d+ \d+] [\S*:error] |^[\w+ \w+ \d+ \d+:\d+:\d+.\d+ \d+] [\S+:info] </prematch>
+</decoder>
+
+<decoder name="apache-errorlog-modsecurity">
+  <parent>apache-errorlog</parent>
+  <prematch>ModSecurity: </prematch>
+  <regex type="pcre2">^\[[^\]]*\]\s+\[:error\]\s+\[pid\s+[^\]]*\].*?\[client\s+([^\]:]+)(?::\d+)?\].*?ModSecurity:\s+(?:Access denied with code\s+(\d+)|Warning\.).*?\[file\s+"([^"]+)"\].*?\[id\s+"([^"]+)"\].*?\[msg\s+"([^"]+)"\].*?\[hostname\s+"([^"]+)"\].*?\[uri\s+"([^"]+)"\]</regex>
+  <order>srcip, status_code, modsecurity.rule_file, modsecurity.rule_id, modsecurity.msg, dstip, url</order>
 </decoder>
 
 <decoder name="apache24-errorlog-ip-port">

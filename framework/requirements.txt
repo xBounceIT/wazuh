@@ -1,10 +1,10 @@
-aiohttp==3.9.5
+aiohttp==3.13.4
 brotli-asgi==1.4.0
 cachetools==4.1.0
 chardet==3.0.4
 connexion==3.1.0
 content-size-limit-asgi==0.1.5
-cryptography==42.0.4
+cryptography==46.0.7
 Cython==0.29.36
 defusedxml==0.6.0
 fastapi==0.111.1
